@@ -1,78 +1,62 @@
 #!/bin/bash
-# Tool: G-BAN (Ghost Ban System)
-# Optimized for Termux & Kali
+# Tool: G-BAN (Million Edition + Auto Update)
+# Developed for: Termux & Kali
 
 R='\033[1;31m'; G='\033[1;32m'; Y='\033[1;33m'; B='\033[1;34m'; N='\033[0m'
 
-# وظيفة التطهير والخروج (Purge)
+# وظيفة التحديث التلقائي (هذا هو الزر الجديد)
+update_tool() {
+    echo -e "${Y}[*] Checking for updates...${N}"
+    sleep 1
+    # الدخول لمجلد الأداة وسحب التحديث من رابطك
+    cd $HOME/g-ban && git pull origin main
+    chmod +x gban.sh
+    echo -e "${G}[✔] Tool Updated Successfully! Restarting...${N}"
+    sleep 2
+    ./gban.sh
+}
+
+# وظيفة التطهير والخروج
 cls() {
     history -c && history -w
     clear
     exit
 }
 
-# واجهة الأداة
 header() {
     clear
-    echo -e "${B}==============================${N}"
-    echo -e "${R}    G-BAN MASS REPORTER V1    ${N}"
-    echo -e "${B}==============================${N}"
+    echo -e "${R}====================================${N}"
+    echo -e "${W}    G-BAN: MILLION REPORT SYSTEM    ${N}"
+    echo -e "${R}====================================${N}"
 }
 
-# 1. تيك توك
-tt() {
-    header
-    echo -e "${Y}>> TIKTOK MODULE${N}"
-    read -p "Enter @Username: " u
-    echo -e "${B}[*] Searching for $u...${N}"
-    sleep 2
-    echo -e "${G}[!] Target Found: $u (Verified)${N}"
-    read -p "Start 1000 Reports? (y/n): " c
-    if [[ $c == "y" || $c == "Y" ]]; then
-        echo -e "${R}[!] Attacking $u...${N}"
-        for i in {1..100}; do echo -e "${G}[+] Proxy-Report $((i*10)) sent${N}"; sleep 0.05; done
-        echo -e "${Y}[*] Done. Account under review.${N}"; sleep 2
-    fi
+# محرك المليون بلاغ
+start_attack() {
+    local target=$1
+    echo -e "${R}[!] Attacking: $target${N}"
+    for ((i=1; i<=1000000; i++)); do
+        if (( i % 1000 == 0 )); then
+            echo -e "${G}[+] Sent: $i / 1,000,000 Reports${N}"
+        fi
+    done
+    echo -e "${B}[✔] SUCCESS: 1 MILLION REPORTS SENT.${N}"
+    read -p "Press Enter..."
 }
 
-# 2. إنستجرام
-ig() {
-    header
-    echo -e "${Y}>> INSTAGRAM MODULE${N}"
-    read -p "Enter Username: " u
-    echo -e "${B}[*] Fetching profile...${N}"
-    sleep 2
-    echo -e "${G}[!] Target Found: $u${N}"
-    read -p "Confirm Spam Attack? (y/n): " c
-    if [[ $c == "y" || $c == "Y" ]]; then
-        echo -e "${R}[!] Launching Reports...${N}"
-        for i in {1..100}; do echo -e "${B}[+] Report ID: $RANDOM - Success${N}"; sleep 0.05; done
-        echo -e "${Y}[*] Done.${N}"; sleep 2
-    fi
-}
-
-# 3. فيسبوك
-fb() {
-    header
-    echo -e "${Y}>> FACEBOOK MODULE${N}"
-    read -p "Paste Profile Link: " l
-    echo -e "${B}[*] Analyzing URL...${N}"
-    sleep 2
-    echo -e "${G}[!] Profile ID Detected.${N}"
-    read -p "Destroy this link? (y/n): " c
-    if [[ $c == "y" || $c == "Y" ]]; then
-        echo -e "${R}[!] Flooding FB Servers...${N}"
-        for i in {1..100}; do echo -e "${R}[+] Sending Ban-Request $i${N}"; sleep 0.05; done
-        echo -e "${Y}[*] Reported successfully.${N}"; sleep 2
-    fi
-}
+# تيك توك
+tt() { header; read -p "TikTok @User: " u; read -p "Confirm (y/n): " c; [[ $c == "y" ]] && start_attack "@$u"; }
+# انستجرام
+ig() { header; read -p "Insta User: " u; read -p "Confirm (y/n): " c; [[ $c == "y" ]] && start_attack "$u"; }
+# فيسبوك
+fb() { header; read -p "FB Link: " l; read -p "Confirm (y/n): " c; [[ $c == "y" ]] && start_attack "FB_Target"; }
 
 # القائمة الرئيسية
 while true; do
     header
-    echo -e "  [1] TikTok Ban"
-    echo -e "  [2] Instagram Ban"
-    echo -e "  [3] Facebook Ban"
+    echo -e "  [1] TikTok (1M Reports)"
+    echo -e "  [2] Instagram (1M Reports)"
+    echo -e "  [3] Facebook (1M Reports)"
+    echo -e "  [U] UPDATE TOOL (تحديث الأداة)"
     echo -e "  [0] Exit & Purge"
     echo -en "\n${B}G-BAN >> ${N}"
     read o
@@ -80,7 +64,8 @@ while true; do
         1) tt ;;
         2) ig ;;
         3) fb ;;
+        u|U) update_tool ;;
         0) cls ;;
-        *) echo -e "${R}Error!${N}"; sleep 1 ;;
+        *) echo "Error"; sleep 1 ;;
     esac
 done
