@@ -1,31 +1,13 @@
 #!/bin/bash
-# Tool: G-BAN (Auto-Restart Control Edition) - English Version
+# Tool: G-BAN (Name Fetcher + 1M Reports)
+# Clean Version - No Update Button
 
 R='\033[1;31m'; G='\033[1;32m'; Y='\033[1;33m'; B='\033[1;34m'; W='\033[1;37m'; N='\033[0m'
-
-# Update Function with Auto-Restart
-update_tool() {
-    echo -e "${Y}[*] Updating tool and syncing files...${N}"
-    sleep 1
-    cd $HOME && rm -rf g-ban
-    git clone https://github.com/mazenasad/g-ban.git
-    
-    # Install shortcut for quick access
-    if [ -d "$PREFIX/bin" ]; then
-        cp g-ban/gban.sh $PREFIX/bin/gban && chmod +x $PREFIX/bin/gban
-    else
-        sudo cp g-ban/gban.sh /usr/bin/gban && sudo chmod +x /usr/bin/gban
-    fi
-    
-    echo -e "${G}[✔] Update complete! Restarting for control...${N}"
-    sleep 2
-    cd $HOME/g-ban && chmod +x gban.sh && exec ./gban.sh
-}
 
 header() {
     clear
     echo -e "${B}==============================${N}"
-    echo -e "${R}       G-BAN SYSTEM V6        ${N}"
+    echo -e "${R}       G-BAN SYSTEM V7        ${N}"
     echo -e "${B}==============================${N}"
 }
 
@@ -52,7 +34,7 @@ attack() {
             fi
         done
         echo -e "${Y}[✔] Account Banned Successfully.${N}"
-        read -p "Press Enter to return to control menu..."
+        read -p "Press Enter to return to menu..."
     fi
 }
 
@@ -61,14 +43,12 @@ while true; do
     header
     echo -e "  [1] TikTok Ban (User -> Name)"
     echo -e "  [2] Instagram Ban (User -> Name)"
-    echo -e "  [U] UPDATE (Auto-Restart)"
     echo -e "  [0] Exit & Purge"
     echo -en "\n${B}G-BAN >> ${N}"
     read o
     case $o in
         1) read -p "Enter TikTok Username: " u; attack "$u" ;;
         2) read -p "Enter Instagram Username: " u; attack "$u" ;;
-        u|U) update_tool ;;
         0) history -c; history -w; clear; exit ;;
         *) echo -e "${R}Error: Invalid Option!${N}"; sleep 1 ;;
     esac
