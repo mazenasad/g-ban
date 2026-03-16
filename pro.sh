@@ -1,76 +1,43 @@
 #!/bin/bash
-# Tool: G-BAN PRO (Username Hunter Edition)
-# Status: Session-Based Search
 
-R='\033[1;31m'; G='\033[1;32m'; Y='\033[1;33m'; B='\033[1;34m'; W='\033[1;37m'; N='\033[0m'
+# ألوان للتنسيق
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-# وظيفة التأكد من السيزون آيدي
-auth_check() {
-    if [ -f .sid.txt ]; then
-        SID=$(cat .sid.txt)
-    else
-        clear
-        echo -e "${Y}[!] Pro Mode: Enter TikTok SessionID to start hunting:${N}"
-        read -p "Session ID: " sid_input
-        echo "$sid_input" > .sid.txt
-        SID=$sid_input
-    fi
-}
+clear
+echo -e "${CYAN}=======================================${NC}"
+echo -e "${GREEN}    TikTok User Hunter Pro (By Mazen)  ${NC}"
+echo -e "${CYAN}=======================================${NC}"
 
-header() {
-    clear
-    echo -e "${B}=================================================${N}"
-    echo -e "${W}          G-BAN PRO: USERNAME HUNTER             ${N}"
-    echo -e "${B}=================================================${N}"
-}
+# طلب البيانات من المستخدم
+read -p "Enter your Session ID: " SID
+read -p "Enter the Username you want: " TARGET_USER
 
-# محرك الفحص عن طريق السيزون
-check_pro() {
-    local user=$1
-    header
-    echo -e "${Y}[*] Hunting for: ${W}$user${N}"
-    echo -e "${B}[*] Sending Request via Session ID...${N}"
-    sleep 1.5
+echo -e "\n${YELLOW}Searching for: ${TARGET_USER}...${NC}"
 
-    # الفحص العميق (بيشوف كود الاستجابة من سيرفر تيك توك)
-    status=$(curl -s -o /dev/null -w "%{http_code}" -b "sessionid=$SID" "https://www.tiktok.com/@$user")
-
-    echo -e "${B}-------------------------------------------------${N}"
-    if [ "$status" == "404" ]; then
-        echo -e "${G}[✔] AVAILABLE: ${W}$user${N}"
-        echo -e "${G}[+] This username is FREE. You can take it!${N}"
-    elif [ "$status" == "200" ]; then
-        echo -e "${R}[X] TAKEN: ${W}$user${N}"
-        echo -e "${R}[-] Someone is already using this username.${N}"
-    else
-        echo -e "${Y}[!] SESSION ERROR: Check your Session ID or Proxy.${N}"
-    fi
-    echo -e "${B}-------------------------------------------------${N}"
-}
-
-# القائمة الرئيسية
-auth_check
 while true; do
-    header
-    echo -e "  [1] Check Username (Arabic/Special Style)"
-    echo -e "  [2] Change Session ID"
-    echo -e "  [0] Exit Pro Mode"
-    echo -en "\n${B}G-BAN PRO >> ${N}"
-    read op
-    case $op in
-        1)
-            echo -en "${W}Enter Username: ${N}"
-            read target
-            if [[ -z "$target" ]]; then
-                echo -e "${R}Please enter a username!${N}"
-                sleep 1
-            else
-                check_pro "$target"
-                read -p "Press Enter to return..."
-            fi
-            ;;
-        2) rm .sid.txt && auth_check ;;
-        0) exit ;;
-        *) echo -e "${R}Invalid Option!${N}"; sleep 1 ;;
-    esac
+    # فحص اليوزر هل هو متاح أم لا
+    check=$(curl -s -o /dev/null -w "%{http_code}" "https://www.tiktok.com/@${TARGET_USER}")
+
+    if [ "$check" == "404" ]; then
+        echo -e "${GREEN}[+] User @${TARGET_USER} is AVAILABLE! Attempting to claim...${NC}"
+        
+        # محاولة تغيير اليوزر باستخدام السيزون آيدي
+        claim=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/" \
+            -H "Cookie: sessionid=${SID}" \
+            -d "unique_id=${TARGET_USER}")
+
+        if [[ $claim == *"success"* ]]; then
+            echo -e "${GREEN}[!!!] CONGRATULATIONS! @${TARGET_USER} is now YOURS!${NC}"
+            exit 1
+        else
+            echo -e "${RED}[!] Failed to claim. Maybe SessionID expired?${NC}"
+        fi
+        break
+    else
+        echo -e "${RED}[-] @${TARGET_USER} is still taken... Retrying in 1s${NC}"
+        sleep 1
+    fi
 done
