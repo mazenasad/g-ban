@@ -1,41 +1,69 @@
 #!/bin/bash
+# ==========================================
+# TOOL: TIKTOK USER CHANGER PRO (V5.0)
+# OWNER: MAZEN (MAZENASAD)
+# REPO: g-ban
+# ==========================================
 
-# تنظيف الشاشة
+# ألوان وتنسيقات المبرمجين
+G='\033[1;32m' # أخضر
+R='\033[1;31m' # أحمر
+Y='\033[1;33m' # أصفر
+C='\033[1;36m' # سماوي
+W='\033[1;37m' # أبيض
+
 clear
-echo -e "\033[1;32m[ MAZEN V3.0 - AUTOMATIC USER CHANGER ]\033[0m"
-echo "----------------------------------------------"
 
-# طلب البيانات
-read -p "أدخل السيزون آيدي (SessionID): " SID
-read -p "أدخل اليوزر اللي بدك تصيده (الهدف): " TARGET
+# دالة الترحيب والشعار (عشان يبان احترافي)
+header() {
+    echo -e "${C}############################################${W}"
+    echo -e "${C}#                                          #${W}"
+    echo -e "${C}#   WELCOME TO MAZEN TIKTOK CHANGER V5.0   #${W}"
+    echo -e "${C}#       FAST - RELIABLE - POWERFUL         #${W}"
+    echo -e "${C}#                                          #${W}"
+    echo -e "${C}############################################${W}"
+}
 
-echo -e "\n\033[1;33m[*] جاري مراقبة اليوزر @$TARGET ...\033[0m"
+header
 
-while true; do
-    # فحص إذا اليوزر أصبح متاحاً (404 يعني متاح)
-    check=$(curl -s -o /dev/null -w "%{http_code}" "https://www.tiktok.com/@$TARGET")
+# التأكد من وجود curl (تحديث الأدوات)
+if ! command -v curl &> /dev/null; then
+    echo -e "${Y}[!] Installing requirements...${W}"
+    pkg install curl -y &> /dev/null
+fi
 
-    if [ "$check" == "404" ]; then
-        echo -e "\n\033[1;32m[+] اليوزر متاح الآن! جاري محاولة السحب...\033[0m"
-        
-        # الكود المسؤول عن تغيير يوزر حسابك فوراً
-        response=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/" \
-            -H "Cookie: sessionid=$SID" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15" \
-            --data-urlencode "unique_id=$TARGET")
+# طلب البيانات من المستخدم
+echo -e "\n${G}[+] Enter Your Session Details:${W}"
+read -p "  > SessionID: " SID
+read -p "  > Target User: " TARGET
 
-        if [[ $response == *"success"* ]]; then
-            echo -e "\033[1;36m[✔] مبروك يا مازن! تم تغيير يوزر حسابك إلى: @$TARGET\033[0m"
-            exit
-        else
-            echo -e "\033[1;31m[!] فشل السحب. تأكد من السيزون آيدي أو أن اليوزر مسموح به.\033[0m"
-            echo "الرد من تيك توك: $response"
-            exit
-        fi
+echo -e "\n${Y}[*] Connecting to TikTok Servers...${W}"
+sleep 1
+
+# محاولة التغيير المباشرة
+# هنا بنبعت الطلب الرسمي لتغيير اليوزر في تيك توك
+change_user() {
+    response=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/" \
+        -H "Cookie: sessionid=$SID" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15" \
+        -d "unique_id=$TARGET")
+
+    # تحليل الرد (لو نجح أو رفض)
+    if [[ $response == *"success"* ]]; then
+        echo -e "\n${G}[✔] SUCCESS! User changed to @$TARGET${W}"
+        echo -e "${G}[✔] Check your account now.${W}"
+    elif [[ $response == *"unique_id_already_exists"* ]]; then
+        echo -e "\n${R}[!] REJECTED! This user is already taken.${W}"
+    elif [[ $response == *"too many attempts"* ]]; then
+        echo -e "\n${R}[!] REJECTED! Too many attempts. Try again later.${W}"
     else
-        # طباعة نقطة عشان تعرف إنه شغال بيفحص
-        echo -ne "\033[1;37m.\033[0m"
-        sleep 0.4
+        echo -e "\n${R}[!] REJECTED BY TIKTOK!${W}"
+        echo -e "${Y}Reason: $response${W}"
     fi
-done
+}
+
+change_user
+
+echo -e "\n${C}------------------------------------------${W}"
+echo -e "${G}Thanks for using Mazen Tool!${W}"
