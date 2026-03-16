@@ -1,43 +1,41 @@
 #!/bin/bash
 
-# ألوان للتنسيق
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
+# تنظيف الشاشة
 clear
-echo -e "${CYAN}=======================================${NC}"
-echo -e "${GREEN}    TikTok User Hunter Pro (By Mazen)  ${NC}"
-echo -e "${CYAN}=======================================${NC}"
+echo -e "\033[1;32m[ MAZEN V3.0 - AUTOMATIC USER CHANGER ]\033[0m"
+echo "----------------------------------------------"
 
-# طلب البيانات من المستخدم
-read -p "Enter your Session ID: " SID
-read -p "Enter the Username you want: " TARGET_USER
+# طلب البيانات
+read -p "أدخل السيزون آيدي (SessionID): " SID
+read -p "أدخل اليوزر اللي بدك تصيده (الهدف): " TARGET
 
-echo -e "\n${YELLOW}Searching for: ${TARGET_USER}...${NC}"
+echo -e "\n\033[1;33m[*] جاري مراقبة اليوزر @$TARGET ...\033[0m"
 
 while true; do
-    # فحص اليوزر هل هو متاح أم لا
-    check=$(curl -s -o /dev/null -w "%{http_code}" "https://www.tiktok.com/@${TARGET_USER}")
+    # فحص إذا اليوزر أصبح متاحاً (404 يعني متاح)
+    check=$(curl -s -o /dev/null -w "%{http_code}" "https://www.tiktok.com/@$TARGET")
 
     if [ "$check" == "404" ]; then
-        echo -e "${GREEN}[+] User @${TARGET_USER} is AVAILABLE! Attempting to claim...${NC}"
+        echo -e "\n\033[1;32m[+] اليوزر متاح الآن! جاري محاولة السحب...\033[0m"
         
-        # محاولة تغيير اليوزر باستخدام السيزون آيدي
-        claim=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/" \
-            -H "Cookie: sessionid=${SID}" \
-            -d "unique_id=${TARGET_USER}")
+        # الكود المسؤول عن تغيير يوزر حسابك فوراً
+        response=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/" \
+            -H "Cookie: sessionid=$SID" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15" \
+            --data-urlencode "unique_id=$TARGET")
 
-        if [[ $claim == *"success"* ]]; then
-            echo -e "${GREEN}[!!!] CONGRATULATIONS! @${TARGET_USER} is now YOURS!${NC}"
-            exit 1
+        if [[ $response == *"success"* ]]; then
+            echo -e "\033[1;36m[✔] مبروك يا مازن! تم تغيير يوزر حسابك إلى: @$TARGET\033[0m"
+            exit
         else
-            echo -e "${RED}[!] Failed to claim. Maybe SessionID expired?${NC}"
+            echo -e "\033[1;31m[!] فشل السحب. تأكد من السيزون آيدي أو أن اليوزر مسموح به.\033[0m"
+            echo "الرد من تيك توك: $response"
+            exit
         fi
-        break
     else
-        echo -e "${RED}[-] @${TARGET_USER} is still taken... Retrying in 1s${NC}"
-        sleep 1
+        # طباعة نقطة عشان تعرف إنه شغال بيفحص
+        echo -ne "\033[1;37m.\033[0m"
+        sleep 0.4
     fi
 done
