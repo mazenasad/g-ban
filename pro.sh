@@ -1,41 +1,34 @@
 #!/bin/bash
-# ==========================================
-# TOOL: TIKTOK INSTANT CHANGER (NO HUNTING)
-# OWNER: MAZEN (MAZENASAD)
-# ==========================================
-
-# تعريف الألوان
-G='\033[1;32m' # أخضر
-R='\033[1;31m' # أحمر
-Y='\033[1;33m' # أصفر
-C='\033[1;36m' # سماوي
-W='\033[1;37m' # أبيض
-
 clear
+G='\033[1;32m'
+R='\033[1;31m'
+Y='\033[1;33m'
+C='\033[1;36m'
+W='\033[1;37m'
+
 echo -e "${C}============================================${W}"
-echo -e "${G}     WELCOME TO g-ban INSTANT CHANGER       ${W}"
+echo -e "${G}     MAZEN INSTANT CHANGER V6.0 (FIXED)     ${W}"
 echo -e "${C}============================================${W}"
 
-# إدخال البيانات
-echo -e "${Y}[!] أدخل بيانات الحساب:${W}"
 read -p "  > SessionID: " SID
 read -p "  > New Username: " NEW_USER
 
-echo -e "\n${G}[*] جاري إرسال طلب التغيير الآن...${W}"
+echo -e "\n${Y}[*] جاري محاولة التغيير بالرابط الجديد...${W}"
 
-# طلب التغيير المباشر (مرة واحدة فقط)
-res=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/" \
+# الرابط المحدث مع الهيدرز المطلوبة لتجنب خطأ url doesn't match
+res=$(curl -s -X POST "https://www.tiktok.com/api/v1/user/profile/update/?aid=1988" \
     -H "Cookie: sessionid=$SID" \
+    -H "User-Agent: com.zhiliaoapp.musically/2022405040 (Linux; U; Android 12; ad-JO)" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "unique_id=$NEW_USER")
 
-# فحص النتيجة والرد بالسبب لو رفض
+# فحص الرد
 if [[ $res == *"success"* ]]; then
-    echo -e "\n${G}[✔] مبروك يا مازن! تم تغيير اليوزر بنجاح لـ @$NEW_USER${W}"
+    echo -e "\n${G}[✔] مبروك يا مازن! تم التغيير بنجاح لـ @$NEW_USER${W}"
 else
     echo -e "\n${R}[!] تيك توك رفض الطلب!${W}"
-    echo -e "${Y}السبب المكتوب من السيرفر:${W} $res"
+    # تنظيف الرد عشان يظهر لك السبب بوضوح
+    reason=$(echo $res | grep -o '"status_msg":"[^"]*' | cut -d'"' -f4)
+    echo -e "${Y}السبب:${W} ${reason:-$res}"
 fi
-
 echo -e "\n${C}============================================${W}"
-echo -e "${G}تم الانتهاء. الأداة ستغلق الآن.${W}"
